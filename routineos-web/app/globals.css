@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ─── CSS Custom Properties ─────────────────────────────────────────── */
+:root {
+  --color-primary: #6C47FF;
+  --color-primary-light: #8B6FFF;
+  --color-accent: #A78BFA;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+
+  --color-bg: #0F0F1A;
+  --color-card: #1A1A2E;
+  --color-elevated: #252540;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-text-primary: #F4F4F8;
+  --color-text-secondary: #9B9BB4;
+  --color-text-muted: #5C5C78;
+
+  --radius-card: 16px;
+  --radius-button: 12px;
+  --radius-pill: 50px;
+
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 350ms ease;
+
+  --nav-height: 68px;
+  --header-height: 60px;
+}
+
+.light {
+  --color-bg: #F8F7FF;
+  --color-card: #FFFFFF;
+  --color-elevated: #F0EEFF;
+  --color-border: rgba(108, 71, 255, 0.12);
+  --color-text-primary: #0F0F1A;
+  --color-text-secondary: #5C5C78;
+  --color-text-muted: #9B9BB4;
+  --shadow-card: 0 2px 12px rgba(108, 71, 255, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* ─── Base Reset ─────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  transition: background-color var(--transition-slow), color var(--transition-slow);
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-elevated); border-radius: 2px; }
+
+/* ─── Selection ──────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(108, 71, 255, 0.3);
+  color: var(--color-text-primary);
+}
+
+/* ─── Focus ──────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Component Layer ─────────────────────────────────────────────────── */
+@layer components {
+  /* Glass card */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  .light .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(108, 71, 255, 0.1);
+  }
+
+  /* Solid card */
+  .solid-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Press effect */
+  .press-effect {
+    transition: transform var(--transition-fast);
+  }
+  .press-effect:active {
+    transform: scale(0.97);
+  }
+
+  /* Page container */
+  .page-container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 16px;
+    padding-bottom: calc(var(--nav-height) + 16px);
+    padding-top: calc(var(--header-height) + 16px);
+  }
+
+  /* Bottom nav safe area */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--nav-height);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--color-card);
+    border-top: 1px solid var(--color-border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 100;
+  }
+
+  /* Category pill colors */
+  .cat-health { background: rgba(16, 185, 129, 0.15); color: #10B981; }
+  .cat-study { background: rgba(59, 130, 246, 0.15); color: #60A5FA; }
+  .cat-skill { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
+  .cat-mindfulness { background: rgba(167, 139, 250, 0.15); color: #A78BFA; }
+  .cat-personal { background: rgba(236, 72, 153, 0.15); color: #F472B6; }
+}
+
+/* ─── Utility Layer ───────────────────────────────────────────────────── */
+@layer utilities {
+  .text-primary { color: var(--color-text-primary); }
+  .text-secondary { color: var(--color-text-secondary); }
+  .text-muted { color: var(--color-text-muted); }
+  .bg-surface { background-color: var(--color-bg); }
+  .bg-card { background-color: var(--color-card); }
+  .bg-elevated { background-color: var(--color-elevated); }
+  .border-surface { border-color: var(--color-border); }
+
+  .no-select { user-select: none; -webkit-user-select: none; }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-top { padding-top: env(safe-area-inset-top); }
+}

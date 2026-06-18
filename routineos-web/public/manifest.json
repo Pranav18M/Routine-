@@ -1,0 +1,27 @@
+{
+  "name": "RoutineOS",
+  "short_name": "RoutineOS",
+  "description": "The routine that adapts to your real life",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F0F1A",
+  "theme_color": "#6C47FF",
+  "categories": ["productivity", "health", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
