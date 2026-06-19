@@ -1,5 +1,4 @@
 import './globals.css';
-import '../styles/animations.css';
 import { Inter } from 'next/font/google';
 import ToastContainer from '../components/ui/Toast';
 
@@ -13,13 +12,18 @@ export const metadata = {
   title: 'RoutineOS — The routine that adapts to your real life',
   description: 'Build habits that survive real life. Smart recovery, adaptive modes, AI insights.',
   manifest: '/manifest.json',
-  themeColor: '#6C47FF',
-  viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
   appleWebApp: {
     capable: true,
     title: 'RoutineOS',
     statusBarStyle: 'black-translucent',
   },
+};
+
+export const viewport = {
+  themeColor: '#6C47FF',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }) {

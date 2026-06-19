@@ -78,18 +78,23 @@ export function useAuth() {
   const signUpWithEmail = async (email, password, name) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) throw error;
+      // Create the account via backend (admin-created, auto email-confirmed)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name }),
+      });
+      const result = await res.json();
 
-      // Create profile via backend
-      if (data.user) {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password, name }),
-        });
+      if (!res.ok) {
+        throw new Error(result.message || 'Sign up failed');
       }
 
+      // Immediately sign in to establish a real session
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) throw signInError;
+
+      await fetchProfile();
       addToast({ type: 'success', message: 'Account created! Welcome to RoutineOS.' });
       return { success: true };
     } catch (err) {

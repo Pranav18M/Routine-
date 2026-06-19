@@ -2,8 +2,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { userApi } from '../../../lib/api';
-import Button from '../../../components/ui/Button';
-import { cn } from '../../../lib/utils';
 import useStore from '../../../store/useStore';
 
 const GOALS = [
@@ -17,11 +15,53 @@ const GOALS = [
   { key: 'reading', emoji: '📖', label: 'Read more books' },
 ];
 
-const STEPS = ['goals', 'schedule', 'generating', 'preview'];
+const styleTag = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { box-sizing: border-box; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .ob-page { min-height:100vh; background:#0F0F1A; padding:32px 20px; font-family:'Inter',system-ui,sans-serif; color:#F4F4F8; }
+  .ob-wrap { max-width:420px; margin:0 auto; display:flex; flex-direction:column; gap:24px; animation:fadeUp 0.4s ease-out; }
+  .ob-step { font-size:12px; font-weight:700; color:#A78BFA; text-transform:uppercase; letter-spacing:0.06em; }
+  .ob-title { font-size:26px; font-weight:800; margin-top:8px; line-height:1.25; }
+  .ob-sub { font-size:14px; color:#9B9BB4; margin-top:8px; line-height:1.5; }
+  .ob-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .ob-goal { display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding:16px; border-radius:16px; text-align:left; cursor:pointer; border:2px solid transparent; background:#252540; transition:all 0.2s; font-family:'Inter',system-ui,sans-serif; }
+  .ob-goal:hover:not(.maxed) { border-color:rgba(255,255,255,0.12); }
+  .ob-goal.selected { background:rgba(108,71,255,0.2); border-color:#6C47FF; }
+  .ob-goal.maxed { opacity:0.4; cursor:not-allowed; }
+  .ob-goal-emoji { font-size:24px; }
+  .ob-goal-label { font-size:13px; font-weight:600; line-height:1.35; color:#F4F4F8; }
+  .ob-goal-check { font-size:10px; font-weight:700; color:#6C47FF; }
+  .ob-btn { width:100%; padding:16px; font-size:16px; font-weight:700; border-radius:12px; border:none; cursor:pointer; background:linear-gradient(135deg,#6C47FF,#8B6FFF); color:#fff; font-family:'Inter',system-ui,sans-serif; box-shadow:0 4px 20px rgba(108,71,255,0.4); transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .ob-btn:disabled { background:#3A3A5C; box-shadow:none; cursor:not-allowed; }
+  .ob-btn:hover:not(:disabled) { transform:translateY(-1px); }
+  .ob-back { background:none; border:none; color:#9B9BB4; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:4px; padding:0; margin-bottom:8px; font-family:'Inter',system-ui,sans-serif; }
+  .ob-card { background:#1A1A2E; border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:16px; }
+  .ob-row { display:flex; align-items:center; justify-content:space-between; }
+  .ob-row-label { font-size:14px; font-weight:600; color:#F4F4F8; }
+  .ob-row-sub { font-size:12px; color:#9B9BB4; margin-top:2px; }
+  .ob-time-input { background:#252540; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:8px 12px; font-size:15px; font-weight:600; color:#F4F4F8; font-family:'Inter',system-ui,sans-serif; }
+  .ob-textarea { width:100%; background:#252540; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px 16px; font-size:14px; color:#F4F4F8; resize:none; font-family:'Inter',system-ui,sans-serif; outline:none; }
+  .ob-textarea:focus { border-color:#6C47FF; }
+  .ob-textarea::placeholder { color:#5C5C78; }
+  .ob-label-sm { font-size:14px; font-weight:600; margin-bottom:8px; }
+  .ob-center { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; text-align:center; gap:20px; }
+  .ob-spinner-lg { width:64px; height:64px; border:4px solid #6C47FF; border-top:4px solid transparent; border-radius:50%; animation:spin 0.9s linear infinite; position:relative; }
+  .ob-spinner-emoji { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:22px; }
+  .ob-gen-title { font-size:20px; font-weight:700; }
+  .ob-gen-sub { font-size:13px; color:#9B9BB4; margin-top:4px; }
+  .ob-preview-list { display:flex; flex-direction:column; gap:8px; max-height:50vh; overflow-y:auto; }
+  .ob-habit-row { background:#1A1A2E; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:14px; display:flex; align-items:center; gap:12px; }
+  .ob-habit-emoji { font-size:20px; }
+  .ob-habit-name { font-size:14px; font-weight:600; color:#F4F4F8; }
+  .ob-habit-meta { font-size:12px; color:#9B9BB4; margin-top:2px; }
+  .ob-habit-cat { font-size:10px; padding:3px 8px; border-radius:50px; font-weight:600; background:rgba(167,139,250,0.15); color:#A78BFA; white-space:nowrap; }
+`;
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { setUser, addToast } = useStore();
+  const { addToast } = useStore();
   const [step, setStep] = useState('goals');
   const [selectedGoals, setSelectedGoals] = useState([]);
   const [wakeTime, setWakeTime] = useState('06:30');
@@ -63,181 +103,158 @@ export default function OnboardingPage() {
 
   if (step === 'goals') {
     return (
-      <div className="min-h-dvh flex flex-col px-5 py-8 bg-[var(--color-bg)]">
-        <div className="max-w-sm mx-auto w-full space-y-6 anim-fade-up">
-          <div>
-            <p className="text-[12px] font-semibold text-[#A78BFA] uppercase tracking-wider">Step 1 of 2</p>
-            <h1 className="text-[26px] font-bold text-primary mt-2 leading-tight">
-              What do you want to focus on?
-            </h1>
-            <p className="text-[14px] text-secondary mt-2">Pick up to 3 goals. Your AI routine will be built around these.</p>
-          </div>
+      <>
+        <style>{styleTag}</style>
+        <div className="ob-page">
+          <div className="ob-wrap">
+            <div>
+              <p className="ob-step">Step 1 of 2</p>
+              <h1 className="ob-title">What do you want to focus on?</h1>
+              <p className="ob-sub">Pick up to 3 goals. Your AI routine will be built around these.</p>
+            </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            {GOALS.map(goal => {
-              const selected = selectedGoals.includes(goal.key);
-              const maxed = selectedGoals.length === 3 && !selected;
-              return (
-                <button
-                  key={goal.key}
-                  onClick={() => toggleGoal(goal.key)}
-                  disabled={maxed}
-                  className={cn(
-                    'flex flex-col items-start gap-2 p-4 rounded-[16px] text-left',
-                    'transition-all duration-200 active:scale-[0.97]',
-                    selected
-                      ? 'bg-[rgba(108,71,255,0.2)] border-2 border-[#6C47FF]'
-                      : maxed
-                        ? 'bg-[var(--color-elevated)] border-2 border-transparent opacity-40'
-                        : 'bg-[var(--color-elevated)] border-2 border-transparent hover:border-[var(--color-border)]',
-                  )}
-                >
-                  <span className="text-2xl">{goal.emoji}</span>
-                  <p className="text-[13px] font-semibold text-primary leading-snug">{goal.label}</p>
-                  {selected && (
-                    <span className="text-[10px] font-bold text-[#6C47FF]">✓ Selected</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+            <div className="ob-grid">
+              {GOALS.map(goal => {
+                const selected = selectedGoals.includes(goal.key);
+                const maxed = selectedGoals.length === 3 && !selected;
+                return (
+                  <button
+                    key={goal.key}
+                    onClick={() => toggleGoal(goal.key)}
+                    disabled={maxed}
+                    className={'ob-goal' + (selected ? ' selected' : '') + (maxed ? ' maxed' : '')}
+                  >
+                    <span className="ob-goal-emoji">{goal.emoji}</span>
+                    <span className="ob-goal-label">{goal.label}</span>
+                    {selected && <span className="ob-goal-check">✓ Selected</span>}
+                  </button>
+                );
+              })}
+            </div>
 
-          <Button
-            fullWidth
-            size="lg"
-            disabled={selectedGoals.length === 0}
-            onClick={() => setStep('schedule')}
-          >
-            Continue → ({selectedGoals.length}/3 selected)
-          </Button>
+            <button
+              className="ob-btn"
+              disabled={selectedGoals.length === 0}
+              onClick={() => setStep('schedule')}
+            >
+              Continue → ({selectedGoals.length}/3 selected)
+            </button>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (step === 'schedule') {
     return (
-      <div className="min-h-dvh flex flex-col px-5 py-8 bg-[var(--color-bg)]">
-        <div className="max-w-sm mx-auto w-full space-y-6 anim-fade-up">
-          <div>
-            <button onClick={() => setStep('goals')} className="text-[13px] text-secondary mb-4 flex items-center gap-1">
-              ← Back
-            </button>
-            <p className="text-[12px] font-semibold text-[#A78BFA] uppercase tracking-wider">Step 2 of 2</p>
-            <h1 className="text-[26px] font-bold text-primary mt-2 leading-tight">
-              Tell us about your day
-            </h1>
-            <p className="text-[14px] text-secondary mt-2">
-              This helps the AI schedule habits in realistic time slots.
-            </p>
-          </div>
+      <>
+        <style>{styleTag}</style>
+        <div className="ob-page">
+          <div className="ob-wrap">
+            <div>
+              <button onClick={() => setStep('goals')} className="ob-back">← Back</button>
+              <p className="ob-step">Step 2 of 2</p>
+              <h1 className="ob-title">Tell us about your day</h1>
+              <p className="ob-sub">This helps the AI schedule habits in realistic time slots.</p>
+            </div>
 
-          <div className="space-y-4">
-            <div className="solid-card p-4 space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="ob-card">
+              <div className="ob-row">
                 <div>
-                  <p className="text-[14px] font-semibold text-primary">Wake up time</p>
-                  <p className="text-[12px] text-secondary">When do you usually get up?</p>
+                  <p className="ob-row-label">Wake up time</p>
+                  <p className="ob-row-sub">When do you usually get up?</p>
                 </div>
                 <input
                   type="time"
                   value={wakeTime}
                   onChange={e => setWakeTime(e.target.value)}
-                  className="bg-[var(--color-elevated)] border border-[var(--color-border)] rounded-[10px]
-                    px-3 py-2 text-[15px] font-semibold text-primary focus:outline-none focus:border-[#6C47FF]"
+                  className="ob-time-input"
                 />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="ob-row">
                 <div>
-                  <p className="text-[14px] font-semibold text-primary">Sleep time</p>
-                  <p className="text-[12px] text-secondary">Ideal bedtime?</p>
+                  <p className="ob-row-label">Sleep time</p>
+                  <p className="ob-row-sub">Ideal bedtime?</p>
                 </div>
                 <input
                   type="time"
                   value={sleepTime}
                   onChange={e => setSleepTime(e.target.value)}
-                  className="bg-[var(--color-elevated)] border border-[var(--color-border)] rounded-[10px]
-                    px-3 py-2 text-[15px] font-semibold text-primary focus:outline-none focus:border-[#6C47FF]"
+                  className="ob-time-input"
                 />
               </div>
             </div>
 
             <div>
-              <p className="text-[14px] font-semibold text-primary mb-2">Work / College schedule (optional)</p>
+              <p className="ob-label-sm">Work / College schedule (optional)</p>
               <textarea
                 value={workSchedule}
                 onChange={e => setWorkSchedule(e.target.value)}
                 placeholder="e.g. College 9am–5pm weekdays, work from home Thursdays"
                 rows={3}
-                className="w-full bg-[var(--color-elevated)] border border-[var(--color-border)]
-                  rounded-[12px] px-4 py-3 text-[14px] text-primary placeholder:text-muted
-                  resize-none focus:outline-none focus:border-[#6C47FF] transition-colors"
+                className="ob-textarea"
               />
             </div>
-          </div>
 
-          <Button fullWidth size="lg" loading={loading} onClick={handleGenerateRoutine}>
-            ✨ Generate my AI routine
-          </Button>
+            <button className="ob-btn" onClick={handleGenerateRoutine} disabled={loading}>
+              ✨ Generate my AI routine
+            </button>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (step === 'generating') {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-5 bg-[var(--color-bg)]">
-        <div className="text-center space-y-5 anim-fade-up">
-          <div className="relative">
-            <div className="w-20 h-20 border-4 border-[#6C47FF] border-t-transparent rounded-full animate-spin mx-auto" />
-            <div className="absolute inset-0 flex items-center justify-center text-2xl">✨</div>
-          </div>
-          <div>
-            <h2 className="text-[20px] font-bold text-primary">Building your routine</h2>
-            <p className="text-[13px] text-secondary mt-1">AI is crafting habits that fit your life...</p>
+      <>
+        <style>{styleTag}</style>
+        <div className="ob-page">
+          <div className="ob-center">
+            <div className="ob-spinner-lg">
+              <span className="ob-spinner-emoji">✨</span>
+            </div>
+            <div>
+              <h2 className="ob-gen-title">Building your routine</h2>
+              <p className="ob-gen-sub">AI is crafting habits that fit your life...</p>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (step === 'preview') {
     return (
-      <div className="min-h-dvh flex flex-col px-5 py-8 bg-[var(--color-bg)]">
-        <div className="max-w-sm mx-auto w-full space-y-5 anim-fade-up">
-          <div className="text-center">
-            <span className="text-4xl">🎉</span>
-            <h1 className="text-[24px] font-bold text-primary mt-3">Your routine is ready!</h1>
-            <p className="text-[13px] text-secondary mt-1">
-              Here's what the AI built for you. You can edit anything later.
-            </p>
-          </div>
+      <>
+        <style>{styleTag}</style>
+        <div className="ob-page">
+          <div className="ob-wrap">
+            <div style={{ textAlign: 'center' }}>
+              <span style={{ fontSize: '40px' }}>🎉</span>
+              <h1 className="ob-title" style={{ marginTop: '12px' }}>Your routine is ready!</h1>
+              <p className="ob-sub">Here's what the AI built for you. You can edit anything later.</p>
+            </div>
 
-          <div className="space-y-2 stagger-children max-h-[50dvh] overflow-y-auto">
-            {generatedHabits.map((habit, i) => (
-              <div key={i} className="solid-card p-3.5 flex items-center gap-3">
-                <span className="text-xl">{habit.icon || '✅'}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-semibold text-primary truncate">{habit.name}</p>
-                  <p className="text-[12px] text-secondary">
-                    {habit.scheduled_time} · {habit.duration_mins}min
-                  </p>
+            <div className="ob-preview-list">
+              {generatedHabits.map((habit, i) => (
+                <div key={i} className="ob-habit-row">
+                  <span className="ob-habit-emoji">{habit.icon || '✅'}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p className="ob-habit-name">{habit.name}</p>
+                    <p className="ob-habit-meta">{habit.scheduled_time} · {habit.duration_mins}min</p>
+                  </div>
+                  <span className="ob-habit-cat">{habit.category}</span>
                 </div>
-                <span className={cn(
-                  'text-[10px] px-2 py-0.5 rounded-pill font-medium',
-                  `cat-${habit.category}`
-                )}>
-                  {habit.category}
-                </span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          <Button fullWidth size="lg" onClick={handleFinish}>
-            Let's start 🚀
-          </Button>
+            <button className="ob-btn" onClick={handleFinish}>
+              Let's start 🚀
+            </button>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 

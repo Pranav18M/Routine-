@@ -15,5 +15,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
   },
 });
+console.log(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
 export default supabase;

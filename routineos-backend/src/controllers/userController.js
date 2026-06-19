@@ -70,18 +70,28 @@ async function completeOnboarding(req, res, next) {
       })
       .eq('id', req.user.id);
 
-    if (userError) throw userError;
+    if (userError) {
+      console.error('ONBOARDING USER UPDATE ERROR:', userError.message);
+      throw userError;
+    }
 
     // Generate routine via Gemini
-    const habits = await generateRoutine({
-      name: name || req.user.name,
-      wakeTime,
-      sleepTime,
-      goals,
-      workSchedule,
-    });
+    let habits;
+    try {
+      habits = await generateRoutine({
+        name: name || req.user.name,
+        wakeTime,
+        sleepTime,
+        goals,
+        workSchedule,
+      });
+    } catch (geminiErr) {
+      console.error('ONBOARDING GEMINI ERROR:', geminiErr.message);
+      return sendError(res, `AI routine generation failed: ${geminiErr.message}`, 500);
+    }
 
     if (!Array.isArray(habits)) {
+      console.error('ONBOARDING: Gemini did not return an array. Got:', JSON.stringify(habits).slice(0, 300));
       return sendError(res, 'AI routine generation failed', 500);
     }
 

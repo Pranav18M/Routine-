@@ -23,8 +23,10 @@ async function signup(req, res, next) {
     });
 
     if (authError) {
-      if (authError.message.includes('already registered')) {
-        return sendError(res, 'An account with this email already exists', 409);
+      console.error('Supabase createUser error:', authError.message, authError.status);
+      const msg = authError.message.toLowerCase();
+      if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) {
+        return sendError(res, 'An account with this email already exists. Try signing in instead.', 409);
       }
       return sendError(res, authError.message, 400);
     }
