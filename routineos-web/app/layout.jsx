@@ -9,8 +9,11 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: 'RoutineOS — The routine that adapts to your real life',
-  description: 'Build habits that survive real life. Smart recovery, adaptive modes, AI insights.',
+  title: {
+    default: 'RoutineOS',
+    template: '%s · RoutineOS',
+  },
+  description: 'The routine that adapts to your real life. Build habits that survive real life — smart recovery, adaptive modes, AI insights.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
