@@ -28,6 +28,12 @@ async function authenticate(req, res, next) {
       .single();
 
     if (profileError && profileError.code !== 'PGRST116') {
+      console.error('AUTH MIDDLEWARE — profile fetch error:', {
+        code: profileError.code,
+        message: profileError.message,
+        details: profileError.details,
+        hint: profileError.hint,
+      });
       return sendError(res, 'Failed to fetch user profile', 500);
     }
 

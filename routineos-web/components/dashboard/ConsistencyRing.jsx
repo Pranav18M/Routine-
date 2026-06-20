@@ -1,8 +1,7 @@
 'use client';
 import ProgressRing from '../ui/ProgressRing';
-import { cn } from '../../lib/utils';
 
-function ScoreLabel({ score }) {
+function scoreInfo(score) {
   if (score >= 80) return { label: 'Excellent', color: '#10B981' };
   if (score >= 60) return { label: 'Good', color: '#6C47FF' };
   if (score >= 40) return { label: 'Building', color: '#F59E0B' };
@@ -10,36 +9,21 @@ function ScoreLabel({ score }) {
 }
 
 export default function ConsistencyRing({ score = 0, todayCompleted = 0, todayTotal = 0 }) {
-  const { label, color } = ScoreLabel({ score });
-
+  const { label, color } = scoreInfo(score);
   return (
-    <div className="solid-card p-5 flex items-center gap-5">
-      <ProgressRing
-        percentage={score}
-        size={88}
-        strokeWidth={8}
-        color={color}
-        label={`${Math.round(score)}`}
-        sublabel="score"
-        animate
-      />
-      <div className="flex-1 min-w-0">
-        <p className="text-[18px] font-bold text-primary leading-tight">{label}</p>
-        <p className="text-[13px] text-secondary mt-0.5">30-day consistency</p>
-
+    <div className="card card-pad" style={{ display:'flex', alignItems:'center', gap:20 }}>
+      <ProgressRing percentage={score} size={88} strokeWidth={8} color={color} label={`${Math.round(score)}`} sublabel="score" animate />
+      <div style={{ flex:1, minWidth:0 }}>
+        <p style={{ fontSize:18, fontWeight:700, color:'#F4F4F8', margin:0, lineHeight:1.2 }}>{label}</p>
+        <p style={{ fontSize:13, color:'#9B9BB4', marginTop:2 }}>30-day consistency</p>
         {todayTotal > 0 && (
-          <div className="mt-3">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[12px] text-secondary">Today</span>
-              <span className="text-[12px] font-semibold text-primary">
-                {todayCompleted}/{todayTotal}
-              </span>
+          <div style={{ marginTop:12 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
+              <span style={{ fontSize:12, color:'#9B9BB4' }}>Today</span>
+              <span style={{ fontSize:12, fontWeight:600, color:'#F4F4F8' }}>{todayCompleted}/{todayTotal}</span>
             </div>
-            <div className="h-1.5 bg-[var(--color-elevated)] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#6C47FF] rounded-full transition-all duration-700"
-                style={{ width: `${todayTotal > 0 ? (todayCompleted / todayTotal) * 100 : 0}%` }}
-              />
+            <div style={{ height:6, background:'#252540', borderRadius:50, overflow:'hidden' }}>
+              <div style={{ height:'100%', background:'#6C47FF', borderRadius:50, transition:'width 0.7s', width:`${todayTotal > 0 ? (todayCompleted/todayTotal)*100 : 0}%` }} />
             </div>
           </div>
         )}

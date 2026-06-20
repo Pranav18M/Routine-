@@ -1,36 +1,25 @@
 'use client';
 import { useState } from 'react';
-import { cn } from '../../lib/utils';
 
-export default function MorningBriefing({ text, userName }) {
+export default function MorningBriefing({ text }) {
   const [expanded, setExpanded] = useState(false);
-
   if (!text) return null;
-
   const lines = text.split('\n').filter(Boolean);
-  const preview = lines[0];
   const hasMore = lines.length > 1;
 
   return (
-    <div className="glass-card p-5 anim-fade-up" style={{ borderColor: 'rgba(108,71,255,0.2)' }}>
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-lg">🌅</span>
-        <p className="text-[12px] font-semibold text-[#A78BFA] uppercase tracking-wider">
-          Morning Briefing
-        </p>
+    <div className="glass-card card-pad anim-fade-up" style={{ animation:'fadeUp 0.3s ease-out' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:12 }}>
+        <span style={{ fontSize:18 }}>🌅</span>
+        <p style={{ fontSize:12, fontWeight:600, color:'#A78BFA', textTransform:'uppercase', letterSpacing:'0.05em', margin:0 }}>Morning Briefing</p>
       </div>
-      <div className={cn('space-y-1.5 overflow-hidden transition-all duration-300')}>
-        {(expanded ? lines : [preview]).map((line, i) => (
-          <p key={i} className="text-[14px] text-primary leading-relaxed">
-            {line}
-          </p>
+      <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+        {(expanded ? lines : [lines[0]]).map((line, i) => (
+          <p key={i} style={{ fontSize:14, color:'#F4F4F8', lineHeight:1.6, margin:0 }}>{line}</p>
         ))}
       </div>
       {hasMore && (
-        <button
-          onClick={() => setExpanded(v => !v)}
-          className="mt-2 text-[12px] font-semibold text-[#6C47FF] hover:opacity-80 transition-opacity"
-        >
+        <button onClick={() => setExpanded(v => !v)} style={{ marginTop:8, fontSize:12, fontWeight:600, color:'#6C47FF', background:'none', border:'none', cursor:'pointer', padding:0 }}>
           {expanded ? 'Show less ↑' : 'Read more ↓'}
         </button>
       )}

@@ -156,7 +156,10 @@ async function switchMode(req, res, next) {
       .select('id, current_mode, mode_until')
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('SWITCH MODE DB ERROR:', { code: error.code, message: error.message, details: error.details, hint: error.hint });
+      throw error;
+    }
 
     return sendSuccess(res, data, `Switched to ${mode} mode`);
   } catch (err) {

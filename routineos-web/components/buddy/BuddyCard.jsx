@@ -1,66 +1,36 @@
 'use client';
 import ProgressRing from '../ui/ProgressRing';
 import Button from '../ui/Button';
-import { getModeEmoji } from '../../lib/utils';
-import { cn } from '../../lib/utils';
+
+const MODE_EMOJIS = { normal:'🌟', exam:'📚', travel:'✈️', sick:'🤒', grind:'🔥' };
 
 export default function BuddyCard({ buddy, onNudge, nudging, onRemove }) {
   if (!buddy) return null;
-
-  const initials = buddy.name
-    ? buddy.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-    : '?';
+  const initials = buddy.name ? buddy.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) : '?';
 
   return (
-    <div className="solid-card p-5 space-y-4">
-      {/* Buddy info */}
-      <div className="flex items-center gap-4">
-        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#6C47FF] to-[#A78BFA]
-          flex items-center justify-center text-white text-[18px] font-bold shrink-0">
-          {buddy.avatar_url ? (
-            <img src={buddy.avatar_url} alt={buddy.name} className="w-full h-full rounded-full object-cover" />
-          ) : initials}
+    <div className="card card-pad" style={{ display:'flex', flexDirection:'column', gap:16 }}>
+      <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+        <div style={{ width:56, height:56, borderRadius:'50%', background:'linear-gradient(135deg,#6C47FF,#A78BFA)', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontSize:18, fontWeight:700, flexShrink:0, overflow:'hidden' }}>
+          {buddy.avatar_url ? <img src={buddy.avatar_url} alt={buddy.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : initials}
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-[16px] font-bold text-primary truncate">{buddy.name || 'Your Buddy'}</p>
-            {buddy.current_mode && buddy.current_mode !== 'normal' && (
-              <span className="text-base">{getModeEmoji(buddy.current_mode)}</span>
-            )}
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+            <p style={{ fontSize:16, fontWeight:700, color:'#F4F4F8', margin:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{buddy.name || 'Your Buddy'}</p>
+            {buddy.current_mode && buddy.current_mode !== 'normal' && <span style={{ fontSize:16 }}>{MODE_EMOJIS[buddy.current_mode]}</span>}
           </div>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <div className={cn(
-              'w-2 h-2 rounded-full',
-              buddy.loggedToday ? 'bg-[#10B981]' : 'bg-[var(--color-elevated)]'
-            )} />
-            <p className="text-[12px] text-secondary">
-              {buddy.loggedToday ? 'Logged today ✓' : 'Not logged yet today'}
-            </p>
+          <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:2 }}>
+            <div style={{ width:8, height:8, borderRadius:'50%', background: buddy.loggedToday ? '#10B981' : '#252540' }} />
+            <p style={{ fontSize:12, color:'#9B9BB4', margin:0 }}>{buddy.loggedToday ? 'Logged today ✓' : 'Not logged yet today'}</p>
           </div>
         </div>
-        <ProgressRing
-          percentage={buddy.consistency_score || 0}
-          size={60}
-          strokeWidth={5}
-          color="#6C47FF"
-          label={`${Math.round(buddy.consistency_score || 0)}`}
-          sublabel="%"
-        />
+        <ProgressRing percentage={buddy.consistency_score || 0} size={60} strokeWidth={5} color="#6C47FF" label={`${Math.round(buddy.consistency_score||0)}`} sublabel="%" />
       </div>
-
-      {/* Actions */}
-      <div className="flex gap-2">
-        <Button
-          fullWidth
-          variant={buddy.loggedToday ? 'secondary' : 'primary'}
-          onClick={onNudge}
-          loading={nudging}
-        >
+      <div style={{ display:'flex', gap:8 }}>
+        <Button fullWidth variant={buddy.loggedToday ? 'secondary' : 'primary'} onClick={onNudge} loading={nudging}>
           {buddy.loggedToday ? '👊 Send cheer' : '👊 Send nudge'}
         </Button>
-        <Button variant="ghost" onClick={onRemove} size="md" className="shrink-0 px-3">
-          ✕
-        </Button>
+        <Button variant="ghost" onClick={onRemove} size="md" style={{ flexShrink:0, padding:'13px 16px' }}>✕</Button>
       </div>
     </div>
   );

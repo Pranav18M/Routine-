@@ -8,100 +8,64 @@ import PatternGrid from '../../../components/insights/PatternGrid';
 import Button from '../../../components/ui/Button';
 import { InsightSkeleton } from '../../../components/ui/LoadingSkeleton';
 import { useInsights } from '../../../hooks/useInsights';
-import { cn } from '../../../lib/utils';
 
 export default function InsightsPage() {
   const { weeklyInsights, chartData, loading, generating, fetchWeeklyInsights, fetchChartData, generateInsight } = useInsights();
   const [chartDays, setChartDays] = useState(14);
 
-  useEffect(() => {
-    fetchWeeklyInsights();
-    fetchChartData(14);
-  }, []);
+  useEffect(() => { fetchWeeklyInsights(); fetchChartData(14); }, []);
 
-  const handleChartRange = (days) => {
-    setChartDays(days);
-    fetchChartData(days);
-  };
+  const handleChartRange = (days) => { setChartDays(days); fetchChartData(days); };
 
   return (
     <>
       <Header
         title="Insights"
         subtitle="Your patterns and progress"
-        rightAction={
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={generateInsight}
-            loading={generating}
-          >
-            Generate
-          </Button>
-        }
+        rightAction={<Button size="sm" variant="secondary" onClick={generateInsight} loading={generating}>Generate</Button>}
       />
 
       <PageWrapper>
-        {loading ? (
-          <InsightSkeleton />
-        ) : (
-          <div className="space-y-5 stagger-children">
-            {/* Latest insight */}
+        {loading ? <InsightSkeleton /> : (
+          <div className="stagger" style={{ display:'flex', flexDirection:'column', gap:20 }}>
             {weeklyInsights.length > 0 ? (
               <WeeklyInsightCard insight={weeklyInsights[0]} />
             ) : (
-              <div className="solid-card p-6 text-center">
-                <p className="text-3xl mb-3">📊</p>
-                <p className="text-[15px] font-semibold text-primary">No insights yet</p>
-                <p className="text-[13px] text-secondary mt-1 mb-4">
-                  Log habits for at least a week, then generate your first insight.
-                </p>
-                <Button onClick={generateInsight} loading={generating}>
-                  Generate weekly insight
-                </Button>
+              <div className="card card-pad" style={{ textAlign:'center' }}>
+                <p style={{ fontSize:30, marginBottom:12 }}>📊</p>
+                <p style={{ fontSize:15, fontWeight:600, color:'#F4F4F8', margin:0 }}>No insights yet</p>
+                <p style={{ fontSize:13, color:'#9B9BB4', margin:'4px 0 16px' }}>Log habits for at least a week, then generate your first insight.</p>
+                <Button onClick={generateInsight} loading={generating}>Generate weekly insight</Button>
               </div>
             )}
 
-            {/* Completion chart */}
-            <div className="solid-card p-4">
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-[15px] font-semibold text-primary">Daily completion</p>
-                <div className="flex gap-1">
-                  {[7, 14, 30].map(d => (
-                    <button
-                      key={d}
-                      onClick={() => handleChartRange(d)}
-                      className={cn(
-                        'px-2.5 py-1 rounded-[8px] text-[11px] font-semibold transition-all',
-                        chartDays === d
-                          ? 'bg-[#6C47FF] text-white'
-                          : 'bg-[var(--color-elevated)] text-secondary',
-                      )}
-                    >
-                      {d}d
-                    </button>
+            <div className="card card-pad">
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
+                <p style={{ fontSize:15, fontWeight:600, color:'#F4F4F8', margin:0 }}>Daily completion</p>
+                <div style={{ display:'flex', gap:4 }}>
+                  {[7,14,30].map(d => (
+                    <button key={d} onClick={() => handleChartRange(d)} style={{
+                      padding:'5px 10px', borderRadius:8, fontSize:11, fontWeight:600, border:'none', cursor:'pointer',
+                      background: chartDays === d ? '#6C47FF' : '#252540', color: chartDays === d ? '#fff' : '#9B9BB4',
+                    }}>{d}d</button>
                   ))}
                 </div>
               </div>
               <HabitCompletionChart data={chartData.dailyData} />
             </div>
 
-            {/* Per-habit breakdown */}
             {chartData.habitData?.length > 0 && (
-              <div className="solid-card p-4">
-                <p className="text-[15px] font-semibold text-primary mb-3">Habit breakdown</p>
+              <div className="card card-pad">
+                <p style={{ fontSize:15, fontWeight:600, color:'#F4F4F8', marginBottom:12 }}>Habit breakdown</p>
                 <PatternGrid habitData={chartData.habitData} />
               </div>
             )}
 
-            {/* Past weekly insights */}
             {weeklyInsights.length > 1 && (
               <div>
-                <p className="text-[13px] font-semibold text-secondary uppercase tracking-wider mb-3">Previous weeks</p>
-                <div className="space-y-3">
-                  {weeklyInsights.slice(1).map(insight => (
-                    <WeeklyInsightCard key={insight.id} insight={insight} />
-                  ))}
+                <p style={{ fontSize:13, fontWeight:600, color:'#9B9BB4', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:12 }}>Previous weeks</p>
+                <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                  {weeklyInsights.slice(1).map(insight => <WeeklyInsightCard key={insight.id} insight={insight} />)}
                 </div>
               </div>
             )}

@@ -1,14 +1,25 @@
 'use client';
 import { useState } from 'react';
-import { cn, formatTime, formatDuration, getCategoryClass } from '../../lib/utils';
 
-export default function HabitCard({ habit, log, onComplete, onSkip, onMicro, onPress }) {
+function formatTime(timeStr) {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const dh = h % 12 || 12;
+  return `${dh}:${String(m).padStart(2,'0')} ${period}`;
+}
+function formatDuration(mins) {
+  if (!mins) return '';
+  if (mins < 60) return `${mins} min`;
+  const h = Math.floor(mins/60), m = mins%60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+const catClass = { health:'cat-health', study:'cat-study', skill:'cat-skill', mindfulness:'cat-mindfulness', personal:'cat-personal' };
+
+export default function HabitCard({ habit, log, onComplete, onMicro, onPress }) {
   const [animating, setAnimating] = useState(false);
   const status = log?.status;
-  const isCompleted = status === 'completed';
-  const isMicro = status === 'micro';
-  const isSkipped = status === 'skipped';
-  const isDone = isCompleted || isMicro;
+  const isDone = status === 'completed' || status === 'micro';
 
   const handleComplete = async (e) => {
     e.stopPropagation();
@@ -18,88 +29,60 @@ export default function HabitCard({ habit, log, onComplete, onSkip, onMicro, onP
     setTimeout(() => setAnimating(false), 450);
   };
 
-  const handleMicro = (e) => {
-    e.stopPropagation();
-    onMicro?.(habit);
-  };
-
   return (
     <div
-      className={cn(
-        'solid-card p-4 flex items-center gap-3 cursor-pointer',
-        'transition-all duration-250',
-        isDone && 'opacity-75',
-        animating && 'habit-complete-anim',
-      )}
       onClick={() => onPress?.(habit)}
+      className="card card-pad"
+      style={{
+        display:'flex', alignItems:'center', gap:12, cursor:'pointer',
+        opacity: isDone ? 0.75 : 1, transition:'opacity 0.25s',
+        animation: animating ? 'bounceCheck 0.45s cubic-bezier(0.36,0.07,0.19,0.97)' : undefined,
+      }}
     >
-      {/* Icon */}
-      <div
-        className={cn(
-          'w-11 h-11 rounded-[12px] flex items-center justify-center text-xl shrink-0',
-          'transition-all duration-300',
-          isDone
-            ? 'bg-[rgba(16,185,129,0.2)]'
-            : 'bg-[var(--color-elevated)]',
-        )}
-      >
-        {isDone ? '✓' : habit.icon || '✅'}
+      <div style={{
+        width:44, height:44, borderRadius:12, flexShrink:0, fontSize:20,
+        display:'flex', alignItems:'center', justifyContent:'center',
+        background: isDone ? 'rgba(16,185,129,0.2)' : '#252540', transition:'background 0.3s',
+      }}>
+        {isDone ? '✓' : (habit.icon || '✅')}
       </div>
 
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <p
-            className={cn(
-              'text-[15px] font-semibold truncate',
-              isDone ? 'text-secondary line-through' : 'text-primary',
-            )}
-          >
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:2 }}>
+          <p style={{
+            fontSize:15, fontWeight:600, margin:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
+            color: isDone ? '#9B9BB4' : '#F4F4F8', textDecoration: isDone ? 'line-through' : 'none',
+          }}>
             {habit.name}
           </p>
           {habit.micro_version && !isDone && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-pill bg-[rgba(167,139,250,0.15)] text-[#A78BFA] shrink-0">
-              micro
-            </span>
+            <span className="pill" style={{ background:'rgba(167,139,250,0.15)', color:'#A78BFA', flexShrink:0 }}>micro</span>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className={cn('text-[11px] px-2 py-0.5 rounded-pill font-medium', getCategoryClass(habit.category))}>
-            {habit.category}
-          </span>
-          {habit.scheduled_time && (
-            <span className="text-[12px] text-secondary">{formatTime(habit.scheduled_time)}</span>
-          )}
-          <span className="text-[12px] text-muted">{formatDuration(habit.duration_mins)}</span>
+        <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+          <span className={'pill ' + (catClass[habit.category]||'cat-personal')}>{habit.category}</span>
+          {habit.scheduled_time && <span style={{ fontSize:12, color:'#9B9BB4' }}>{formatTime(habit.scheduled_time)}</span>}
+          <span style={{ fontSize:12, color:'#5C5C78' }}>{formatDuration(habit.duration_mins)}</span>
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div style={{ display:'flex', alignItems:'center', gap:6, flexShrink:0 }}>
         {!isDone && habit.micro_version && (
-          <button
-            onClick={handleMicro}
-            className="w-8 h-8 rounded-full bg-[rgba(167,139,250,0.15)] text-[#A78BFA]
-              text-[11px] font-bold flex items-center justify-center
-              hover:bg-[rgba(167,139,250,0.25)] transition-colors"
-            title="Do micro version"
-          >
+          <button onClick={(e) => { e.stopPropagation(); onMicro?.(habit); }} title="Do micro version"
+            style={{ width:32, height:32, borderRadius:'50%', border:'none', cursor:'pointer', fontSize:11, fontWeight:700,
+              background:'rgba(167,139,250,0.15)', color:'#A78BFA' }}>
             2m
           </button>
         )}
-        <button
-          onClick={handleComplete}
-          disabled={isDone}
-          className={cn(
-            'w-9 h-9 rounded-full flex items-center justify-center',
-            'transition-all duration-200 active:scale-90',
-            isDone
-              ? 'bg-[rgba(16,185,129,0.2)] text-[#10B981]'
-              : 'border-2 border-[var(--color-border)] text-secondary hover:border-[#6C47FF] hover:text-[#6C47FF]',
-          )}
-          aria-label={isDone ? 'Completed' : 'Mark complete'}
-        >
-          {isDone && <span className="text-lg">✓</span>}
+        <button onClick={handleComplete} disabled={isDone} aria-label={isDone ? 'Completed' : 'Mark complete'}
+          style={{
+            width:36, height:36, borderRadius:'50%', cursor: isDone ? 'default' : 'pointer',
+            display:'flex', alignItems:'center', justifyContent:'center', fontSize:17, transition:'all 0.2s',
+            background: isDone ? 'rgba(16,185,129,0.2)' : 'transparent',
+            color: isDone ? '#10B981' : '#9B9BB4',
+            border: isDone ? 'none' : '2px solid rgba(255,255,255,0.12)',
+          }}>
+          {isDone && '✓'}
         </button>
       </div>
     </div>

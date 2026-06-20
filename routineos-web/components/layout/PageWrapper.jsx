@@ -1,16 +1,15 @@
 'use client';
-import { cn } from '../../lib/utils';
+import { SHARED_STYLES } from '../../lib/sharedStyles';
 
-export default function PageWrapper({ children, className, noPadding = false }) {
+export default function PageWrapper({ children, noPadding = false }) {
   return (
-    <main
-      className={cn(
-        'min-h-dvh bg-[var(--color-bg)]',
-        !noPadding && 'page-container',
-        className,
-      )}
-    >
-      {children}
-    </main>
+    <>
+      <style>{SHARED_STYLES}</style>
+      <main className="pg-root">
+        <div className={noPadding ? '' : 'pg-content'}>
+          {children}
+        </div>
+      </main>
+    </>
   );
 }

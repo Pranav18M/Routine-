@@ -1,18 +1,6 @@
 'use client';
 import { useMemo } from 'react';
-import { cn, formatTime } from '../../lib/utils';
 import HabitCard from './HabitCard';
-
-function TimeSlotLabel({ label }) {
-  return (
-    <div className="flex items-center gap-3 mb-2">
-      <span className="text-[11px] font-semibold text-muted uppercase tracking-widest shrink-0">
-        {label}
-      </span>
-      <div className="flex-1 h-px bg-[var(--color-border)]" />
-    </div>
-  );
-}
 
 function getTimeSlot(timeStr) {
   if (!timeStr) return 'anytime';
@@ -22,54 +10,44 @@ function getTimeSlot(timeStr) {
   return 'evening';
 }
 
-export default function HabitTimeline({ habits, logs, onComplete, onSkip, onMicro, onPress }) {
+const slotConfig = [
+  { key: 'morning', label: '🌅 Morning' },
+  { key: 'afternoon', label: '☀️ Afternoon' },
+  { key: 'evening', label: '🌙 Evening' },
+  { key: 'anytime', label: '⏰ Flexible' },
+];
+
+export default function HabitTimeline({ habits, logs, onComplete, onMicro, onPress }) {
   const grouped = useMemo(() => {
     const slots = { morning: [], afternoon: [], evening: [], anytime: [] };
-    for (const habit of (habits || [])) {
-      const slot = getTimeSlot(habit.scheduled_time);
-      slots[slot].push(habit);
-    }
+    for (const habit of (habits || [])) slots[getTimeSlot(habit.scheduled_time)].push(habit);
     return slots;
   }, [habits]);
 
-  const slotConfig = [
-    { key: 'morning', label: '🌅 Morning' },
-    { key: 'afternoon', label: '☀️ Afternoon' },
-    { key: 'evening', label: '🌙 Evening' },
-    { key: 'anytime', label: '⏰ Flexible' },
-  ];
-
-  const hasAny = habits?.length > 0;
-
-  if (!hasAny) {
+  if (!habits?.length) {
     return (
-      <div className="text-center py-12">
-        <p className="text-4xl mb-3">📭</p>
-        <p className="text-[15px] font-semibold text-primary">No habits scheduled</p>
-        <p className="text-[13px] text-secondary mt-1">Add habits in the Habits tab to get started</p>
+      <div style={{ textAlign:'center', padding:'48px 0' }}>
+        <p style={{ fontSize:36, marginBottom:12 }}>📭</p>
+        <p style={{ fontSize:15, fontWeight:600, color:'#F4F4F8', margin:0 }}>No habits scheduled</p>
+        <p style={{ fontSize:13, color:'#9B9BB4', marginTop:4 }}>Add habits in the Habits tab to get started</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 stagger-children">
+    <div className="stagger" style={{ display:'flex', flexDirection:'column', gap:24 }}>
       {slotConfig.map(({ key, label }) => {
         const slotHabits = grouped[key];
         if (!slotHabits?.length) return null;
         return (
           <section key={key}>
-            <TimeSlotLabel label={label} />
-            <div className="space-y-2">
+            <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:8 }}>
+              <span style={{ fontSize:11, fontWeight:700, color:'#5C5C78', textTransform:'uppercase', letterSpacing:'0.08em', flexShrink:0 }}>{label}</span>
+              <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.08)' }} />
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
               {slotHabits.map(habit => (
-                <HabitCard
-                  key={habit.id}
-                  habit={habit}
-                  log={logs?.[habit.id]}
-                  onComplete={onComplete}
-                  onSkip={onSkip}
-                  onMicro={onMicro}
-                  onPress={onPress}
-                />
+                <HabitCard key={habit.id} habit={habit} log={logs?.[habit.id]} onComplete={onComplete} onMicro={onMicro} onPress={onPress} />
               ))}
             </div>
           </section>

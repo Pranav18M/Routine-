@@ -1,39 +1,46 @@
 'use client';
-import { cn } from '../../lib/utils';
+import { useRouter } from 'next/navigation';
 import useStore from '../../store/useStore';
-import { getModeEmoji, getModeLabel } from '../../lib/utils';
+
+const MODE_LABELS = { normal:'Normal', exam:'Exam Mode', travel:'Travel', sick:'Recovery', grind:'Grind Mode' };
+const MODE_EMOJIS = { normal:'🌟', exam:'📚', travel:'✈️', sick:'🤒', grind:'🔥' };
 
 export default function Header({ title, subtitle, showMode = false, rightAction }) {
-  const { user, currentMode } = useStore();
+  const { currentMode } = useStore();
+  const router = useRouter();
 
   return (
-    <header
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50',
-        'bg-[var(--color-bg)]/80 backdrop-blur-[20px]',
-        'border-b border-[var(--color-border)]',
-        'safe-top',
-      )}
-      style={{ height: 'var(--header-height)' }}
-    >
-      <div className="max-w-lg mx-auto px-4 h-full flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <h1 className="text-[17px] font-bold text-primary leading-tight truncate">
-            {title || 'RoutineOS'}
-          </h1>
-          {subtitle && (
-            <p className="text-[12px] text-secondary leading-none mt-0.5 truncate">{subtitle}</p>
-          )}
+    <header className="pg-header">
+      <div className="pg-header-inner">
+        <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0, flex:1 }}>
+          <button
+            onClick={() => router.push('/settings')}
+            aria-label="Settings"
+            style={{
+              width:32, height:32, borderRadius:9, overflow:'hidden', flexShrink:0,
+              border:'none', padding:0, cursor:'pointer', background:'transparent',
+              display:'flex', alignItems:'center', justifyContent:'center',
+            }}
+          >
+            <img
+              src="/icons/Routine logo.png"
+              alt="RoutineOS"
+              style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:9 }}
+              onError={e => { e.target.style.display = 'none'; e.target.parentNode.textContent = '🔄'; }}
+            />
+          </button>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h1 className="pg-header-title" style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+              {title || 'RoutineOS'}
+            </h1>
+            {subtitle && <p className="pg-header-sub" style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{subtitle}</p>}
+          </div>
         </div>
-
-        <div className="flex items-center gap-2 shrink-0">
+        <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
           {showMode && currentMode && currentMode !== 'normal' && (
-            <span className="flex items-center gap-1 px-2.5 py-1 rounded-pill text-[11px] font-semibold
-              bg-[rgba(108,71,255,0.15)] text-[#A78BFA] border border-[rgba(108,71,255,0.2)]">
-              {getModeEmoji(currentMode)} {getModeLabel(currentMode)}
-            </span>
+            <span className="pg-mode-pill">{MODE_EMOJIS[currentMode]} {MODE_LABELS[currentMode]}</span>
           )}
-          {rightAction && rightAction}
+          {rightAction}
         </div>
       </div>
     </header>

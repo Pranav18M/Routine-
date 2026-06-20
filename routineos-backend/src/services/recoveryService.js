@@ -15,6 +15,18 @@ async function checkUserNeedsRecovery(userId, timezone = 'Asia/Kolkata') {
 
   if (activeSession) return false;
 
+  // Don't trigger recovery for users who have never logged anything —
+  // they're new, not "missing" days. Recovery only applies once a
+  // routine has actually started.
+  const { data: anyLogEver } = await supabase
+    .from('habit_logs')
+    .select('id')
+    .eq('user_id', userId)
+    .limit(1)
+    .maybeSingle();
+
+  if (!anyLogEver) return false;
+
   // Check last 3 days for any completed logs
   const today = getTodayInTimezone(timezone);
   const twoDaysAgo = getDaysAgo(2, timezone);

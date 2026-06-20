@@ -18,16 +18,21 @@ import { useLogs } from '../../../hooks/useLogs';
 import { useRecovery } from '../../../hooks/useRecovery';
 import useStore from '../../../store/useStore';
 import { userApi } from '../../../lib/api';
-import { getGreeting } from '../../../lib/utils';
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  if (hour < 21) return 'Good evening';
+  return 'Good night';
+}
 
 export default function TodayPage() {
   const { user, refreshProfile } = useAuth();
-  const { habits, fetchHabits, loading: habitsLoading } = useHabits();
+  const { habits, fetchHabits } = useHabits();
   const { fetchTodayLogs, logHabit, completionSummary } = useLogs();
-  const { checkRecoveryStatus, generateRecoveryPlan, completeRecovery } = useRecovery();
-  const {
-    todayLogs, recoverySession, needsRecovery, currentMode, setCurrentMode, briefingText
-  } = useStore();
+  const { checkRecoveryStatus, generateRecoveryPlan, completeRecovery, generating } = useRecovery();
+  const { todayLogs, recoverySession, needsRecovery, currentMode, setCurrentMode, briefingText } = useStore();
 
   const [pageLoading, setPageLoading] = useState(true);
   const [checkoffHabit, setCheckoffHabit] = useState(null);
@@ -35,11 +40,7 @@ export default function TodayPage() {
   const [switching, setSwitching] = useState(false);
 
   const load = useCallback(async () => {
-    await Promise.all([
-      fetchHabits(),
-      fetchTodayLogs(),
-      checkRecoveryStatus(),
-    ]);
+    await Promise.all([fetchHabits(), fetchTodayLogs(), checkRecoveryStatus()]);
     setPageLoading(false);
   }, [fetchHabits, fetchTodayLogs, checkRecoveryStatus]);
 
@@ -48,13 +49,8 @@ export default function TodayPage() {
     if (user?.current_mode) setCurrentMode(user.current_mode);
   }, [load, user, setCurrentMode]);
 
-  const handleComplete = async (habitId) => {
-    await logHabit(habitId, 'completed');
-  };
-
-  const handleMicroLog = async (habit) => {
-    await logHabit(habit.id, 'micro');
-  };
+  const handleComplete = async (habitId) => { await logHabit(habitId, 'completed'); };
+  const handleMicroLog = async (habit) => { await logHabit(habit.id, 'micro'); };
 
   const handleSwitchMode = async (mode, duration) => {
     setSwitching(true);
@@ -80,96 +76,40 @@ export default function TodayPage() {
     );
   }
 
-  // Recovery gate
   if (needsRecovery && !recoverySession) {
-    return (
-      <RecoveryScreen
-        missedDays={2}
-        onGenerate={generateRecoveryPlan}
-        generating={false}
-      />
-    );
+    return <RecoveryScreen missedDays={2} onGenerate={generateRecoveryPlan} generating={generating} />;
   }
 
   return (
     <>
       <Header
         title={`${getGreeting()}, ${user?.name?.split(' ')[0] || 'there'} 👋`}
-        subtitle={new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+        subtitle={new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' })}
         showMode
         rightAction={
-          <button
-            onClick={() => setModeSwitcherOpen(true)}
-            className="w-9 h-9 flex items-center justify-center rounded-[10px]
-              bg-[var(--color-elevated)] text-secondary hover:text-primary transition-colors"
-          >
-            ⚡
-          </button>
+          <button onClick={() => setModeSwitcherOpen(true)} className="pg-icon-btn">⚡</button>
         }
       />
 
       <PageWrapper>
-        <div className="space-y-4 stagger-children">
-          {/* Morning briefing */}
+        <div className="stagger" style={{ display:'flex', flexDirection:'column', gap:16 }}>
           {briefingText && <MorningBriefing text={briefingText} />}
 
-          {/* Recovery plan if active */}
-          {recoverySession && (
-            <RecoveryPlanCard
-              session={recoverySession}
-              onComplete={completeRecovery}
-            />
-          )}
+          {recoverySession && <RecoveryPlanCard session={recoverySession} onComplete={completeRecovery} />}
 
-          {/* Consistency ring */}
-          <ConsistencyRing
-            score={user?.consistency_score || 0}
-            todayCompleted={summary.completed}
-            todayTotal={summary.total}
-          />
+          <ConsistencyRing score={user?.consistency_score || 0} todayCompleted={summary.completed} todayTotal={summary.total} />
 
-          {/* Mode indicator */}
-          <ModeIndicator
-            mode={currentMode || 'normal'}
-            modeUntil={user?.mode_until}
-            onSwitch={() => setModeSwitcherOpen(true)}
-          />
+          <ModeIndicator mode={currentMode || 'normal'} modeUntil={user?.mode_until} onSwitch={() => setModeSwitcherOpen(true)} />
 
-          {/* Today summary bar */}
-          {habits.length > 0 && (
-            <TodaySummary
-              completed={summary.completed}
-              total={summary.total}
-            />
-          )}
+          {habits.length > 0 && <TodaySummary completed={summary.completed} total={summary.total} />}
 
-          {/* Habit timeline */}
-          <HabitTimeline
-            habits={habits}
-            logs={todayLogs}
-            onComplete={handleComplete}
-            onMicro={handleMicroLog}
-            onPress={setCheckoffHabit}
-          />
+          <HabitTimeline habits={habits} logs={todayLogs} onComplete={handleComplete} onMicro={handleMicroLog} onPress={setCheckoffHabit} />
         </div>
       </PageWrapper>
 
-      {/* Habit checkoff sheet */}
-      <HabitCheckoff
-        habit={checkoffHabit}
-        isOpen={!!checkoffHabit}
-        onClose={() => setCheckoffHabit(null)}
-        onLog={logHabit}
-      />
+      <HabitCheckoff habit={checkoffHabit} isOpen={!!checkoffHabit} onClose={() => setCheckoffHabit(null)} onLog={logHabit} />
 
-      {/* Mode switcher */}
-      <ModeSwitcher
-        currentMode={currentMode}
-        isOpen={modeSwitcherOpen}
-        onClose={() => setModeSwitcherOpen(false)}
-        onSwitch={handleSwitchMode}
-        switching={switching}
-      />
+      <ModeSwitcher currentMode={currentMode} isOpen={modeSwitcherOpen} onClose={() => setModeSwitcherOpen(false)} onSwitch={handleSwitchMode} switching={switching} />
     </>
   );
 }

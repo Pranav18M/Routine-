@@ -3,15 +3,11 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import BottomNav from '../../components/layout/BottomNav';
-import useStore from '../../store/useStore';
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
-  const { initTheme } = useStore();
 
   useEffect(() => {
-    initTheme();
-
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) router.replace('/login');
     });
@@ -21,10 +17,10 @@ export default function DashboardLayout({ children }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [router, initTheme]);
+  }, [router]);
 
   return (
-    <div className="min-h-dvh bg-[var(--color-bg)]">
+    <div style={{ background:'#0F0F1A', minHeight:'100vh' }}>
       {children}
       <BottomNav />
     </div>
