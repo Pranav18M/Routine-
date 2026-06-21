@@ -17,11 +17,11 @@ export const metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: [
-      { url: '/icons/Routine logo.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/Routine logo.png', sizes: '512x512', type: 'image/png' },
+      { url: '/icons/Routine logo1.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/Routine logo1.png', sizes: '512x512', type: 'image/png' },
     ],
-    shortcut: '/icons/Routine logo.png',
-    apple: '/icons/Routine logo.png',
+    shortcut: '/icons/Routine logo1.png',
+    apple: '/icons/Routine logo1.png',
   },
   appleWebApp: {
     capable: true,
