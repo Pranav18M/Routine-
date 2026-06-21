@@ -15,6 +15,14 @@ export const metadata = {
   },
   description: 'The routine that adapts to your real life. Build habits that survive real life — smart recovery, adaptive modes, AI insights.',
   manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/icons/Routine logo.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/Routine logo.png', sizes: '512x512', type: 'image/png' },
+    ],
+    shortcut: '/icons/Routine logo.png',
+    apple: '/icons/Routine logo.png',
+  },
   appleWebApp: {
     capable: true,
     title: 'RoutineOS',
@@ -35,7 +43,6 @@ export default function RootLayout({ children }) {
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body className="font-sans antialiased">
         <ToastContainer />
