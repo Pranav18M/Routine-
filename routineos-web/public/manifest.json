@@ -10,25 +10,25 @@
   "categories": ["productivity", "health", "lifestyle"],
   "icons": [
     {
-      "src": "/icons/Routine logo.png",
+      "src": "/icons/Routine logo1.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/Routine logo.png",
+      "src": "/icons/Routine logo1.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/Routine logo.png",
+      "src": "/icons/Routine logo1.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icons/Routine logo.png",
+      "src": "/icons/Routine logo1.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
