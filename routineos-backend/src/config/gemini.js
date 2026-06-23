@@ -23,6 +23,9 @@ function getGeminiModel(modelName = 'gemini-2.5-flash') {
       topK: 40,
       topP: 0.95,
       maxOutputTokens: 2048,
+      thinkingConfig: {
+        thinkingBudget: 0,
+      },
     },
   });
 }
