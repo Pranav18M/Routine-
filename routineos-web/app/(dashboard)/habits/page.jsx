@@ -64,7 +64,23 @@ function HabitForm({ initial, onSave, onClose, saving }) {
         </div>
         <div>
           <label className="field-label">Duration (min)</label>
-          <input type="number" min={1} max={240} value={form.duration_mins} onChange={e => setForm(f=>({...f, duration_mins: parseInt(e.target.value)||30}))} className="field-input" />
+          <input
+            type="number"
+            min={1}
+            max={240}
+            value={form.duration_mins === 0 ? '' : form.duration_mins}
+            onChange={e => {
+              const val = e.target.value;
+              setForm(f => ({ ...f, duration_mins: val === '' ? 0 : parseInt(val) || 0 }));
+            }}
+            onBlur={e => {
+              if (!form.duration_mins || form.duration_mins < 1) {
+                setForm(f => ({ ...f, duration_mins: 30 }));
+              }
+            }}
+            placeholder="30"
+            className="field-input"
+          />
         </div>
       </div>
 
